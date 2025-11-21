@@ -1,24 +1,37 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
+# Multi-stage build for lighter image
+FROM python:3.11-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements_light.txt .
+RUN pip install --no-cache-dir --user -r requirements_light.txt
+
+# Runtime stage
+FROM python:3.11-alpine
+
+# Install runtime dependencies (curl for health check)
+RUN apk add --no-cache curl
+
+# Create non-root user
+RUN adduser -D app
+
+# Set working directory
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /root/.local /home/app/.local
+ENV PATH=/home/app/.local/bin:$PATH
 
 # Copy source code
 COPY src/ ./src/
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app \
-    && chown -R app:app /app
+# Change ownership
+RUN chown -R app:app /app
 USER app
 
 # Expose port

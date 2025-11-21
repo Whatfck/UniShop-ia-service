@@ -16,7 +16,7 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Unishop IA Service", version="1.0.0")
+app = FastAPI(title="Unishop IA Service", version="0.3.0")
 
 app.add_middleware(
     CORSMiddleware,
