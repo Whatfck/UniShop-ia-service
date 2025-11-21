@@ -9,7 +9,10 @@ import httpx
 try:
     from .semantic_classifier import semantic_classifier
 except ImportError:
-    # Fallback para desarrollo
+    # Fallback for running in container
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from semantic_classifier import semantic_classifier
 
 # Configuración de logging

@@ -27,8 +27,8 @@ WORKDIR /app
 COPY --from=builder /root/.local /home/app/.local
 ENV PATH=/home/app/.local/bin:$PATH
 
-# Copy source code
-COPY src/ ./src/
+# Copy source code to root level
+COPY src/ ./
 
 # Change ownership
 RUN chown -R app:app /app
@@ -41,5 +41,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
+# Set Python path to include current directory
+ENV PYTHONPATH=/app
+
 # Run the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
